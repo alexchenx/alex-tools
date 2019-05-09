@@ -23,3 +23,4 @@ elif [ ${input_num} == 4 ]; then
 	./install_wordpress.sh
 else
 	echo "Don't have this option."
+fi
