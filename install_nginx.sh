@@ -1,7 +1,11 @@
+#!/bin/bash
+# Description: Install Nginx
+
 yum -y install gcc pcre-devel openssl openssl-devel make
 mkdir -p /data/{software,app}
 
 cd /data/software/
+useradd -s /sbin/nologin www
 wget https://qooco-software.oss-cn-beijing.aliyuncs.com/nginx-1.16.0.tar.gz
 tar -zxvf nginx-1.16.0.tar.gz
 cd nginx-1.16.0
@@ -33,6 +37,16 @@ http {
     access_log  logs/access.log  main;
  
     include vhost/*.conf;
+	
+	server {
+        listen 80;
+        server_name localhost;
+
+        location / {
+            root html;
+            index index.html;
+        }
+    }
 }
 EOF
 
@@ -90,9 +104,12 @@ EOF
 
 echo "Set start when boot server."
 echo '/data/app/nginx/sbin/nginx' >> /etc/rc.local
+chmod +x /etc/rc.local
 
 echo "Start nginx service."
 /data/app/nginx/sbin/nginx
+
+echo "Done."
 
 
 

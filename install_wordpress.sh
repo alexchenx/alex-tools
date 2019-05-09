@@ -1,3 +1,11 @@
+#!/bin/bash
+
+echo "Create database."
+mysql -u root -p123456 -e "drop database wordpress;"
+mysql -u root -p123456 -e "create database wordpress;"
+
+echo "Start install wordpress."
+mkdir -p /data/{software,resources}
 cd /data/software/
 wget https://qooco-software.oss-cn-beijing.aliyuncs.com/wordpress-5.2.tar.gz
 tar -zxvf wordpress-5.2.tar.gz
@@ -9,11 +17,17 @@ sed -i 's/username_here/root/' wp-config.php
 sed -i 's/password_here/123456/' wp-config.php
 chown -R www.www /data/resources/wordpress/
 
+my_ip=`ifconfig |grep inet|head -1|awk '{print $2}'`
+website_host="www.chenxie.net"
 
 cat > /data/app/nginx/conf/vhost/wordpress.conf <<EOF
 server {
         listen 80;
-        server_name localhost;
+        server_name ${my_ip};
+		
+		access_log	logs/${my_ip}_access.log main;
+		error_log	logs/${my_ip}_error.log;
+		
         root /data/resources/wordpress;
         location / {
                 try_files \$uri \$uri/ /index.php;
@@ -30,5 +44,5 @@ EOF
 /data/app/nginx/sbin/nginx -s reload
 
 echo "---------- Website ----------"
-echo "Url: http://${server_ip}/"
+echo "Url: http://${my_ip}/"
 echo ""
