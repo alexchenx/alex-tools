@@ -1,11 +1,12 @@
 #!/bin/bash
 
 echo ">>>>> Welcome to use Alex LNMP install program <<<<<"
-echo "0. Install all."
-echo "1. Install Mysql."
-echo "2. Install php."
-echo "3. Install Nginx."
-echo "4. Install Wordpress."
+echo "0. Install all"
+echo "1. Install Mysql"
+echo "2. Install php"
+echo "3. Install Nginx"
+echo "4. Install Wordpress"
+echo ""
 read -p "Please input number to install: " input_num
 
 if [ ${input_num} == 0 ]; then
