@@ -12,17 +12,17 @@ read -p "Please input number to install: " input_num
 if [ $input_num == 0 ]; then
 	pwd
 	source install_mysql.sh
-	/bin/bash install_php.sh
-	/bin/bash install_nginx.sh
-	/bin/bash install_wordpress.sh
+	./install_php.sh
+	./install_nginx.sh
+	./install_wordpress.sh
 elif [ $input_num == 1 ]; then
 	source install_mysql.sh
 elif [ $input_num == 2 ]; then
-	/bin/bash install_php.sh
+	./install_php.sh
 elif [ $input_num == 3 ]; then
-	/bin/bash install_nginx.sh
+	./install_nginx.sh
 elif [ $input_num == 4 ]; then
-	/bin/bash install_wordpress.sh
+	./install_wordpress.sh
 else
 	echo "Don't have this option."
 fi
