@@ -31,17 +31,12 @@
 
 install_mysql.sh
 
+install_php.sh
+
 install_nginx.sh
 
 
 
 以下脚本不能单独使用：
 
-install_php.sh 需要依赖mysql
-
-install_wordpress.sh 需要依赖mysql, php, nginx
-
-
-
-
-
+install_wordpress.sh 需要所在服务器已经安装php和nginx 可使用。
