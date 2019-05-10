@@ -1,7 +1,7 @@
 #!/bin/bash
 # Description: Auto install Mysql5.6.44
 
-yum install -y wget cmake gcc gcc-c++ ncurses-devel bison
+yum install -y wget cmake gcc gcc-c++ ncurses-devel bison autoconf
 mkdir -p /data/{software,app}
 
 mysql_home="/data/app/mysql"
