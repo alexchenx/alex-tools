@@ -38,7 +38,7 @@ http {
  
     include vhost/*.conf;
 	
-	server {
+    server {
         listen 80;
         server_name localhost;
 
