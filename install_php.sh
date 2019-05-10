@@ -1,7 +1,7 @@
 #!/bin/bash
 # Description: Install PHP7.3.5
 
-yum install -y wget gcc gcc-c++ libxml2 libxml2-devel autoconf
+yum install -y wget gcc gcc-c++ libxml2 libxml2-devel autoconf openssl openssl-devel
 mkdir -p /data/{software,app}
 
 php_home="/data/app/php"

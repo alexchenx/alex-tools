@@ -1,7 +1,7 @@
 #!/bin/bash
 
 
-dbhost="locahost"
+dbhost="localhost"
 dbuser="root"
 dbpassword="123456"
 dbname="wordpress"
