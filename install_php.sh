@@ -11,7 +11,7 @@ cd /data/software/
 wget https://qooco-software.oss-cn-beijing.aliyuncs.com/php-7.3.5.tar.gz
 tar -zxvf php-7.3.5.tar.gz
 cd php-7.3.5
-./configure --prefix=${php_home} --enable-fpm --enable-mysqlnd --with-mysqli=mysqlnd --with-pdo-mysql=mysqlnd --with-zlib
+./configure --prefix=${php_home} --enable-fpm --enable-mysqlnd --with-mysqli=mysqlnd --with-pdo-mysql=mysqlnd --with-zlib --with-openssl
 make && make install
 cp ${php_home}/etc/php-fpm.conf.default ${php_home}/etc/php-fpm.conf 
 cp ${php_home}/etc/php-fpm.d/www.conf.default ${php_home}/etc/php-fpm.d/www.conf
