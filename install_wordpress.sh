@@ -8,7 +8,7 @@ dbname="wordpress"
 
 source /etc/profile
 echo "Create database."
-mysql -h ${dbhost} -u root -p123456 -e "drop database wordpress;"
+mysql -h ${dbhost} -u root -p123456 -e "drop database if exists wordpress;"
 mysql -h ${dbhost} -u root -p123456 -e "create database wordpress;"
 
 echo "Start install wordpress."
@@ -19,9 +19,9 @@ tar -zxvf wordpress-5.2.tar.gz
 mv wordpress /data/resources/
 cd /data/resources/wordpress/
 cp wp-config-sample.php wp-config.php
-sed -i 's/database_name_here/${dbname}/' wp-config.php
-sed -i 's/username_here/${dbuser}/' wp-config.php
-sed -i 's/password_here/${dbpassword}/' wp-config.php
+sed -i 's/database_name_here/\${dbname}/' wp-config.php
+sed -i 's/username_here/\${dbuser}/' wp-config.php
+sed -i 's/password_here/\${dbpassword}/' wp-config.php
 chown -R www.www /data/resources/wordpress/
 
 my_ip=`ifconfig |grep inet|head -1|awk '{print $2}'`
@@ -51,5 +51,5 @@ EOF
 /data/app/nginx/sbin/nginx -s reload
 
 echo "---------- Website ----------"
-echo "Url: http://${my_ip}/"
+echo "Url: http://${my_ip}"
 echo ""
