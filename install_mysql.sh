@@ -1,6 +1,5 @@
 #!/bin/bash
 # Description: Auto install Mysql5.6.44
-# Execute script: source install_mysql.sh
 
 yum install -y wget cmake gcc gcc-c++ ncurses-devel bison autoconf
 mkdir -p /data/{software,app}

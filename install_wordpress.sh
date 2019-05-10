@@ -1,5 +1,6 @@
 #!/bin/bash
 
+source /etc/profile
 echo "Create database."
 mysql -u root -p123456 -e "drop database wordpress;"
 mysql -u root -p123456 -e "create database wordpress;"
