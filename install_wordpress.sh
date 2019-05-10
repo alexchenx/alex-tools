@@ -1,6 +1,5 @@
 #!/bin/bash
 
-
 dbhost="localhost"
 dbuser="root"
 dbpassword="123456"
@@ -14,14 +13,28 @@ mysql -h ${dbhost} -u root -p123456 -e "create database wordpress;"
 echo "Start install wordpress."
 mkdir -p /data/{software,resources}
 cd /data/software/
+
+if [ -f /data/software/wordpress-5.2.tar.gz ]; then
+        echo "/data/software/wordpress-5.2.tar.gz is exist, delete it."
+        rm -rf /data/software/wordpress-5.2.tar.gz
+fi
+if [ -d /data/software/wordpress ]; then
+        echo "/data/software/wordpress is exist, delete it."
+        rm -rf /data/software/wordpress
+fi
+if [ -d /data/resources/wordpress ]; then
+        echo "/data/resources/wordpress is exist, delete it."
+        rm -rf /data/resources/wordpress
+fi
+
 wget https://qooco-software.oss-cn-beijing.aliyuncs.com/wordpress-5.2.tar.gz
 tar -zxvf wordpress-5.2.tar.gz
 mv wordpress /data/resources/
 cd /data/resources/wordpress/
 cp wp-config-sample.php wp-config.php
-sed -i 's/database_name_here/\${dbname}/' wp-config.php
-sed -i 's/username_here/\${dbuser}/' wp-config.php
-sed -i 's/password_here/\${dbpassword}/' wp-config.php
+sed -i "s/database_name_here/${dbname}/" wp-config.php
+sed -i "s/username_here/${dbuser}/" wp-config.php
+sed -i "s/password_here/${dbpassword}/" wp-config.php
 chown -R www.www /data/resources/wordpress/
 
 my_ip=`ifconfig |grep inet|head -1|awk '{print $2}'`
@@ -31,10 +44,10 @@ cat > /data/app/nginx/conf/vhost/wordpress.conf <<EOF
 server {
         listen 80;
         server_name ${my_ip};
-		
-		access_log	logs/${my_ip}_access.log main;
-		error_log	logs/${my_ip}_error.log;
-		
+
+                access_log      logs/${my_ip}_access.log main;
+                error_log       logs/${my_ip}_error.log;
+
         root /data/resources/wordpress;
         location / {
                 try_files \$uri \$uri/ /index.php;
