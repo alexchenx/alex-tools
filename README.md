@@ -2,8 +2,6 @@
 
 ## 介绍
 
-介绍
-
 一键安装lnmp环境：Mysql, PHP, Nginx
 
 
