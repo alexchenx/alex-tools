@@ -6,8 +6,9 @@ echo "0. Install All"
 echo "1. Install Mysql+PHP+Nginx"
 echo "2. Install Mysql"
 echo "3. Install PHP"
-echo "4. Install Nginx"
-echo "5. Install Wordpress"
+echo "4. Install OpenSSL"
+echo "5. Install Nginx"
+echo "6. Install Wordpress"
 echo ""
 read -p "Please input number to install: " input_num
 
@@ -25,8 +26,10 @@ elif [ $input_num == 2 ]; then
 elif [ $input_num == 3 ]; then
 	./install_php.sh
 elif [ $input_num == 4 ]; then
-	./install_nginx.sh
+	./install_openssl.sh
 elif [ $input_num == 5 ]; then
+	./install_nginx.sh
+elif [ $input_num == 6 ]; then
 	./install_wordpress.sh
 else
 	echo "Don't have this option."

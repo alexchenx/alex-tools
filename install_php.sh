@@ -17,7 +17,7 @@ if [ -d /data/software/php-7.3.5 ]; then
         rm -rf /data/software/php-7.3.5
 fi
 if [ -d /data/app/php ]; then
-        echo "/data/app/phpwordpress is exist, delete it."
+        echo "/data/app/php is exist, delete it."
         rm -rf /data/app/php
 fi
 
