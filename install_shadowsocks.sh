@@ -1,6 +1,7 @@
 #!/bin/bash
+# Descreption: Install shadowsocks.
 
-echo "Instal pip..."
+echo "Install pip..."
 curl "https://bootstrap.pypa.io/get-pip.py" -o "get-pip.py"
 python get-pip.py
 
@@ -39,3 +40,18 @@ echo "Start shadowsocks service..."
 systemctl start shadowsocks
 
 echo "Done."
+echo ""
+echo "********** Default connection information **********"
+echo ""
+echo "        IP: Your public IP"
+echo "      Port: 8388"
+echo "   Pasword: shadowsocks"
+echo "Encryption: aes-256-cfb"
+echo ""
+echo "****************************************************"
+echo ""
+echo "If you want to change port or passord, please update file /etc/shadowsocks.json , then restart shadowsocks services."
+echo "  start service: systemctl start shadowsocks"
+echo "   stop service: systemctl stop shadowsocks"
+echo "restart service: systemctl restart shadowsocks"
+echo ""
