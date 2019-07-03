@@ -37,6 +37,8 @@ cp /data/software/php-7.3.5/php.ini-production ${php_home}/lib/php.ini
 sed -i 's/user = nobody/user = www/' ${php_home}/etc/php-fpm.d/www.conf
 sed -i 's/group = nobody/group = www/' ${php_home}/etc/php-fpm.d/www.conf
 
+echo "export PATH=\$PATH:${php_home}/bin/" >> /etc/profile
+
 echo "Set start when boot server."
 echo "${php_home}/sbin/php-fpm" >> /etc/rc.local
 chmod +x /etc/rc.local
