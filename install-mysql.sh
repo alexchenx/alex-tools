@@ -19,7 +19,7 @@ cp ${mysql_home}/support-files/my-default.cnf  /etc/my.cnf
 ${mysql_home}/scripts/mysql_install_db --user=mysql --basedir=${mysql_home} --datadir=${mysql_home}/data/
 cp ${mysql_home}/support-files/mysql.server /etc/init.d/mysqld
 
-echo "Set start when boost server."
+echo "Set start when boot server."
 echo '/etc/init.d/mysqld start' >> /etc/rc.local
 chmod +x /etc/rc.local
 
