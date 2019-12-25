@@ -5,10 +5,10 @@ yum install -y wget cmake gcc gcc-c++ ncurses-devel bison autoconf
 mkdir -p /data/{software,app}
 
 mysql_home="/data/app/mysql"
-mysql_default_pwd="123456"
+mysql_default_pwd=`cat /dev/urandom|head -n 10|md5sum|head -c 20`
 
 cd /data/software/
-useradd -s /sbin/nologin mysql
+useradd -s /sbin/nologin -r mysql
 mkdir -p ${mysql_home}/data && chown -R mysql.mysql ${mysql_home}/data/
 wget https://qooco-software.oss-cn-beijing.aliyuncs.com/Mysql/mysql-5.6.44.tar.gz
 tar -zxvf mysql-5.6.44.tar.gz 
