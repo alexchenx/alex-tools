@@ -45,7 +45,7 @@ EOF
 
 $mysql_home/bin/mysqld --initialize-insecure --user=mysql --basedir=$mysql_home --datadir=$mysql_home/data/
 
-cp $mysql_home/support-files/mysql.server /etc/init.d/mysqld
+/bin/cp $mysql_home/support-files/mysql.server /etc/init.d/mysqld
 
 echo "Set start when boot server."
 echo '/etc/init.d/mysqld start' >> /etc/rc.local
