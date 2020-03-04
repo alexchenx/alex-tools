@@ -16,7 +16,7 @@ mkdir -p /data/{software,app}
 mkdir -p $mysql_home/data && chown -R mysql.mysql $mysql_home/data/
 
 cd /data/software/
-wget https://cdn.mysql.com/archives/mysql-5.7/mysql-5.7.28.tar.gz
+wget https://cdn.mysql.com/archives/mysql-5.7/mysql-boost-5.7.28.tar.gz
 tar -zxvf mysql-boost-5.7.28.tar.gz
 cd mysql-5.7.28
 cmake -DCMAKE_INSTALL_PREFIX=$mysql_home -DDOWNLOAD_BOOST=1 -DWITH_BOOST=./boost/boost_1_59_0/
