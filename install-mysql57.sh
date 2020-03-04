@@ -36,7 +36,7 @@ max_allowed_packet=8M
 
 default-storage-engine=INNODB
 character-set-server=utf8mb4
-collation-server=utf8mb4_bin
+collation-server=utf8mb4_unicode_ci
 
 [mysqldump]
 quick
