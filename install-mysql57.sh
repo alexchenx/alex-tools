@@ -62,6 +62,7 @@ echo "Set password for mysql root user."
 mysql -u root -e "set password for root@'localhost' = password('${mysql_default_pwd}');"
 
 echo "Clean Mysql install directory."
+cd ~
 rm -rf /data/software/mysql-boost-5.7.28.tar.gz
 rm -rf /data/software/mysql-5.7.28
 
