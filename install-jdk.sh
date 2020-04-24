@@ -1,8 +1,11 @@
 #!/bin/bash
 
 if [ ! -d /data/software/ ]; then
-    mkdir -p /data/software/
- fi
+        mkdir -p /data/software/
+fi
+if [ ! -d /data/app/ ]; then
+        mkdir -p /data/app/
+fi
  
 cd /data/software/
 wget http://qooco-software.oss-cn-beijing.aliyuncs.com/jdk/jdk-8u161-linux-x64.tar.gz
