@@ -1,5 +1,9 @@
 #!/bin/bash
 
+if [ ! -d /data/software/ ]; then
+    mkdir -p /data/software/
+ fi
+ 
 cd /data/software/
 wget http://qooco-software.oss-cn-beijing.aliyuncs.com/jdk/jdk-8u161-linux-x64.tar.gz
 tar -zxvf jdk-8u161-linux-x64.tar.gz
