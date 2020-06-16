@@ -34,6 +34,11 @@ socket=/tmp/mysql.sock
 key_buffer_size=16M
 max_allowed_packet=8M
 
+# Open audit
+general_log=on
+general_log_file=$mysql_home/data/audit.log
+log_timestamps=SYSTEM
+
 default-storage-engine=INNODB
 character-set-server=utf8mb4
 collation-server=utf8mb4_unicode_ci
