@@ -8,13 +8,13 @@ php_home="/data/app/php"
 
 cd /data/software/
 
-if [ -f /data/software/php-7.3.5.tar.gz ]; then
-        echo "/data/software/php-7.3.5.tar.gz is exist, delete it."
-        rm -rf /data/software/php-7.3.5.tar.gz
+if [ -f /data/software/php-7.3.19.tar.gz ]; then
+        echo "/data/software/php-7.3.19.tar.gz is exist, delete it."
+        rm -rf /data/software/php-7.3.19.tar.gz
 fi
-if [ -d /data/software/php-7.3.5 ]; then
-        echo "/data/software/php-7.3.5 is exist, delete it."
-        rm -rf /data/software/php-7.3.5
+if [ -d /data/software/php-7.3.19 ]; then
+        echo "/data/software/php-7.3.19 is exist, delete it."
+        rm -rf /data/software/php-7.3.19
 fi
 if [ -d /data/app/php ]; then
         echo "/data/app/php is exist, delete it."
