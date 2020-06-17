@@ -6,8 +6,8 @@ mkdir -p /data/{software,app}
 
 cd /data/software/
 useradd -s /sbin/nologin -r www
-wget https://qooco-software.oss-cn-beijing.aliyuncs.com/nginx-1.16.0.tar.gz
-tar -zxvf nginx-1.16.0.tar.gz && cd nginx-1.16.0
+wget http://nginx.org/download/nginx-1.16.1.tar.gz
+tar -zxvf nginx-1.16.1.tar.gz && cd nginx-1.16.1
 ./configure --prefix=/data/app/nginx --with-http_ssl_module --with-http_stub_status_module --with-http_v2_module
 make && make install
 
