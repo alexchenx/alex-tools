@@ -54,7 +54,7 @@ cd /data/software/
 wget https://www.php.net/distributions/php-7.3.19.tar.gz
 tar -zxvf php-7.3.19.tar.gz
 cd php-7.3.19
-./configure --prefix=${php_home} --enable-fpm --enable-mysqlnd --with-mysqli=mysqlnd --with-pdo-mysql=mysqlnd --with-zlib --with-openssl --with-gd --with-curl=/data/app/curl
+./configure --prefix=${php_home} --enable-fpm --enable-mysqlnd --enable-pcntl --enable-zip --with-mysqli=mysqlnd --with-pdo-mysql=mysqlnd --with-zlib --with-openssl --with-gd --with-curl=/data/app/curl
 make && make install
 if [ $? -ne 0 ]; then
 	echo "make && make install failed."
