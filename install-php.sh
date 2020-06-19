@@ -4,9 +4,8 @@
 yum install -y wget gcc gcc-c++ libxml2 libxml2-devel autoconf openssl openssl-devel libpng libpng-devel
 mkdir -p /data/{software,app}
 
-cd /data/software/
-
 # Install curl
+cd /data/software/
 if [ -f /data/software/curl-7.70.0.tar.gz ]; then
         echo "/data/software/curl-7.70.0.tar.gz is exist, delete it."
         rm -rf /data/software/curl-7.70.0.tar.gz
@@ -48,9 +47,10 @@ if [ -d /data/app/php ]; then
 fi
 
 id www
-if [ $? != 0 ]; then
+if [ $? -ne 0 ]; then
 	useradd www
 fi
+cd /data/software/
 wget https://www.php.net/distributions/php-7.3.19.tar.gz
 tar -zxvf php-7.3.19.tar.gz
 cd php-7.3.19
