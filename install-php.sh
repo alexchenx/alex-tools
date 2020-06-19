@@ -62,7 +62,7 @@ if [ $? -ne 0 ]; then
 fi
 cp ${php_home}/etc/php-fpm.conf.default ${php_home}/etc/php-fpm.conf 
 cp ${php_home}/etc/php-fpm.d/www.conf.default ${php_home}/etc/php-fpm.d/www.conf
-cp /data/software/php-7.3.5/php.ini-production ${php_home}/lib/php.ini
+cp /data/software/php-7.3.19/php.ini-production ${php_home}/lib/php.ini
 sed -i 's/user = nobody/user = www/' ${php_home}/etc/php-fpm.d/www.conf
 sed -i 's/group = nobody/group = www/' ${php_home}/etc/php-fpm.d/www.conf
 
