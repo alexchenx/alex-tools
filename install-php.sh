@@ -11,6 +11,14 @@ if [ -f /data/software/curl-7.70.0.tar.gz ]; then
         echo "/data/software/curl-7.70.0.tar.gz is exist, delete it."
         rm -rf /data/software/curl-7.70.0.tar.gz
 fi
+if [ -d /data/software/curl-7.70.0 ]; then
+        echo "/data/software/curl-7.70.0 is exist, delete it."
+        rm -rf /data/software/curl-7.70.0
+fi
+if [ -d /data/app/curl ]; then
+        echo "/data/app/curl is exist, delete it."
+        rm -rf /data/app/curl
+fi
 wget https://curl.haxx.se/download/curl-7.70.0.tar.gz
 tar -zxvf curl-7.70.0.tar.gz
 cd curl-7.70.0
