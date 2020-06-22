@@ -1,5 +1,5 @@
 #!/bin/bash
-# Description: Install PHP7.3.19
+# Description: Install PHP7.2.31
 
 yum install -y wget gcc gcc-c++ libxml2 libxml2-devel autoconf openssl openssl-devel libpng libpng-devel sqlite-devel libcurl-devel
 mkdir -p /data/{software,app}
