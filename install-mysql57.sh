@@ -34,14 +34,19 @@ socket=/tmp/mysql.sock
 key_buffer_size=16M
 max_allowed_packet=8M
 
-# Open audit
+default-storage-engine=INNODB
+character-set-server=utf8mb4
+collation-server=utf8mb4_unicode_ci
+
+# Enable audit
 general_log=on
 general_log_file=$mysql_home/data/audit.log
 log_timestamps=SYSTEM
 
-default-storage-engine=INNODB
-character-set-server=utf8mb4
-collation-server=utf8mb4_unicode_ci
+# Enalbe record slow sql
+slow_query_log=ON
+slow_query_log_file=$mysql_home/data/slow_sql.log
+long_query_time=1
 
 [mysqldump]
 quick
