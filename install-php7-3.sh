@@ -97,7 +97,7 @@ install_php(){
         wget https://www.php.net/distributions/php-7.3.19.tar.gz
         tar -zxvf php-7.3.19.tar.gz
         cd php-7.3.19
-        ./configure --prefix=${php_home} --enable-zip --enable-fpm --enable-mysqlnd --enable-mbstring --enable-pcntl --with-mysqli=mysqlnd --with-pdo-mysql=mysqlnd --with-zlib --with-openssl --with-gd --with-curl=/data/app/curl --with-php-config=/data/app/php/bin/php-config --with-freetype-dir=/data/app/freetype2
+        ./configure --prefix=${php_home} --enable-zip --enable-fpm --enable-mysqlnd --enable-mbstring --enable-pcntl --with-mysqli=mysqlnd --with-pdo-mysql=mysqlnd --with-zlib --with-openssl --with-gd --with-curl=/data/app/curl --with-php-config=/data/app/php/bin/php-config --with-freetype-dir=/data/app/freetype2 --enable-bcmath
         make && make install
         if [ $? -ne 0 ]; then
                 echo "make && make install failed."
