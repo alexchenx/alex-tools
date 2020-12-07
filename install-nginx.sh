@@ -27,6 +27,7 @@ worker_rlimit_nofile 102400;
 http {
     include       mime.types;
     default_type  application/octet-stream;
+    server_names_hash_bucket_size 128;
  
     log_format  main escape=json '\$remote_addr - \$remote_user [\$time_local] "\$request" '
                       '\$status \$body_bytes_sent "\$http_referer" '
@@ -58,7 +59,6 @@ sendfile on;
 tcp_nopush on;
 tcp_nodelay on;
 keepalive_timeout 65;
-server_names_hash_bucket_size 128;
 client_header_buffer_size 2k;
 client_body_buffer_size 256k;
 client_body_in_single_buffer on;
