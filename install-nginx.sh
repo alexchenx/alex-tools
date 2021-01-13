@@ -41,7 +41,7 @@ http {
 EOF
 
 mkdir /data/app/nginx/conf/vhost
-cat > /data/app/nginx/conf/vhost/proxy.conf <<EOF
+cat > /data/app/nginx/conf/vhost/default.conf <<EOF
 #
 server {
     listen 80;
