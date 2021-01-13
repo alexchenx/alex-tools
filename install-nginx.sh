@@ -37,21 +37,26 @@ http {
     access_log  logs/access.log  main;
  
     include vhost/*.conf;
-	
-    server {
-        listen 80;
-        server_name localhost;
+}
+EOF
 
-        location / {
-            root html;
-            index index.html;
-        }
+mkdir /data/app/nginx/conf/vhost
+cat > /data/app/nginx/conf/vhost/proxy.conf <<EOF
+#
+server {
+    listen 80;
+    server_name localhost;
+    
+    access_log logs/access.log main;
+    error_log  logs/error.log;
+
+    location / {
+        root html;
+        index index.html;
     }
 }
 EOF
 
-
-mkdir /data/app/nginx/conf/vhost
 cat > /data/app/nginx/conf/vhost/proxy.conf <<EOF
 #
 server_tokens off;
