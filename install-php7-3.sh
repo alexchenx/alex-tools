@@ -94,6 +94,7 @@ install_php(){
                 useradd www
         fi
         cd /data/software/
+        yum install -y freetype-devel
         wget https://www.php.net/distributions/php-7.3.19.tar.gz
         tar -zxvf php-7.3.19.tar.gz
         cd php-7.3.19
