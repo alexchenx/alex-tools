@@ -4,9 +4,10 @@
 yum -y install gcc pcre-devel openssl openssl-devel make
 mkdir -p /data/{software,app}
 
+version=nginx-1.22.0
 cd /data/software/
-wget http://nginx.org/download/nginx-1.18.0.tar.gz
-tar -zxvf nginx-1.18.0.tar.gz && cd nginx-1.18.0
+wget http://nginx.org/download/${version}.tar.gz
+tar -zxvf ${version}.tar.gz && cd ${version}
 ./configure --prefix=/data/app/nginx --with-http_ssl_module --with-http_stub_status_module --with-http_v2_module
 make && make install
 
@@ -113,6 +114,3 @@ echo "Start nginx service."
 /data/app/nginx/sbin/nginx
 
 echo "Done."
-
-
-
