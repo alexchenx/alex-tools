@@ -66,7 +66,7 @@ install_php(){
     cp /data/app/php/etc/php-fpm.d/www.conf.default /data/app/php/etc/php-fpm.d/www.conf
     cp /data/software/php-7.4.33/php.ini-production /data/app/php/lib/php.ini
 
-    echo "Config envionment variables."
+    echo "Config environment variables."
     if ! grep -w "/data/app/php/bin/" /etc/profile; then
         echo "export PATH=\$PATH:/data/app/php/bin/" >> /etc/profile
     fi
