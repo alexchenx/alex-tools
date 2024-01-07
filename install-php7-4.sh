@@ -2,7 +2,7 @@
 # Description: Install PHP7.4.33 on CentOS7
 
 yum install -y wget gcc gcc-c++ libxml2 libxml2-devel autoconf make automake libtool re2c bison openssl openssl-devel \
-                libpng libpng-devel sqlite-devel libcurl-devel oniguruma-devel libwebp-devel libjpeg-devel
+                libpng libpng-devel sqlite-devel libcurl-devel oniguruma-devel libwebp-devel libjpeg-devel libicu-devel
 mkdir -p /data/{software,app}
 
 DOWNLOAD_LINK="https://www.php.net/distributions/php-7.4.33.tar.gz"
@@ -44,6 +44,8 @@ install_php(){
                 --with-openssl \
                 --with-zlib \
                 --enable-bcmath \
+                --enable-exif \
+                --enable-intl \
                 ; then
         echo "configure failed"
         exit 1
