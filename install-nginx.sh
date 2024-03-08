@@ -218,14 +218,44 @@ proxy_set_header  X-Real-IP  $remote_addr;
 proxy_set_header   X-Forwarded-For  $proxy_add_x_forwarded_for;
 EOF
 
-echo "Set start when boot server."
-if ! grep "/data/app/nginx/sbin/nginx" /etc/rc.local >/dev/null; then
-    echo '/data/app/nginx/sbin/nginx' >> /etc/rc.local
-fi
-chmod +x /etc/rc.local
+green_echo ">>>Setup nginx to system service... "
+cat >/lib/systemd/system/nginx.service <<EOF
+# Stop dance for nginx
+# =======================
+#
+# ExecStop sends SIGSTOP (graceful stop) to the nginx process.
+# If, after 5s (--retry QUIT/5) nginx is still running, systemd takes control
+# and sends SIGTERM (fast shutdown) to the main process.
+# After another 5s (TimeoutStopSec=5), and if nginx is alive, systemd sends
+# SIGKILL to all the remaining processes in the process group (KillMode=mixed).
+#
+# nginx signals reference doc:
+# http://nginx.org/en/docs/control.html
+#
+[Unit]
+Description=A high performance web server and a reverse proxy server
+Documentation=man:nginx(8)
+After=network.target nss-lookup.target
+
+[Service]
+Restart=always
+RestartSec=1
+Type=forking
+PIDFile=/data/app/nginx/logs/nginx.pid
+ExecStartPre=/data/app/nginx/sbin/nginx -t -q -g 'daemon on; master_process on;'
+ExecStart=/data/app/nginx/sbin/nginx -g 'daemon on; master_process on;'
+ExecReload=/data/app/nginx/sbin/nginx -g 'daemon on; master_process on;' -s reload
+ExecStop=-/sbin/start-stop-daemon --quiet --stop --retry QUIT/5 --pidfile /data/app/nginx/logs/nginx.pid
+TimeoutStopSec=5
+KillMode=mixed
+
+[Install]
+WantedBy=multi-user.target
+EOF
+systemctl daemon-reload
+systemctl enable nginx
 
 echo "Start nginx service."
-pkill nginx
-/data/app/nginx/sbin/nginx
-
-green_echo "Done."
+if systemctl start nginx; then
+    green_echo "Started."
+fi
