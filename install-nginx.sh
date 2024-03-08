@@ -78,6 +78,9 @@ cd /tmp/ || exit
 tar -zxf nginx-${nginx_version}.tar.gz && cd nginx-${nginx_version} || exit
 echo "Doing configure..."
 ./configure --prefix=/data/app/nginx \
+            --sbin-path=/usr/sbin/nginx \
+            --conf-path=/etc/nginx/nginx.conf \
+            --pid-path=/run/nginx.pid \
             --with-http_ssl_module \
             --with-http_stub_status_module \
             --with-http_v2_module \
@@ -241,11 +244,11 @@ After=network.target nss-lookup.target
 Restart=always
 RestartSec=1
 Type=forking
-PIDFile=/data/app/nginx/logs/nginx.pid
-ExecStartPre=/data/app/nginx/sbin/nginx -t -q -g 'daemon on; master_process on;'
-ExecStart=/data/app/nginx/sbin/nginx -g 'daemon on; master_process on;'
-ExecReload=/data/app/nginx/sbin/nginx -g 'daemon on; master_process on;' -s reload
-ExecStop=-/sbin/start-stop-daemon --quiet --stop --retry QUIT/5 --pidfile /data/app/nginx/logs/nginx.pid
+PIDFile=/run/nginx.pid
+ExecStartPre=/usr/sbin/nginx -t -q -g 'daemon on; master_process on;'
+ExecStart=/usr/sbin/nginx -g 'daemon on; master_process on;'
+ExecReload=/usr/sbin/nginx -g 'daemon on; master_process on;' -s reload
+ExecStop=-/sbin/start-stop-daemon --quiet --stop --retry QUIT/5 --pidfile /run/nginx.pid
 TimeoutStopSec=5
 KillMode=mixed
 
