@@ -75,9 +75,10 @@ green_echo ">>>Install nginx..."
 cd /tmp/ || exit
 [ -d "nginx-${nginx_version}" ] && rm -rf nginx-${nginx_version}
 
+NGINX_HOME="/data/app/nginx"
 tar -zxf nginx-${nginx_version}.tar.gz && cd nginx-${nginx_version} || exit
 echo "Doing configure..."
-./configure --prefix=/data/app/nginx \
+./configure --prefix=${NGINX_HOME} \
             --with-http_ssl_module \
             --with-http_stub_status_module \
             --with-http_v2_module \
@@ -97,10 +98,10 @@ if ! make install >/dev/null 2>&1; then
 fi
 
 echo "Config nginx..."
-[ ! -f /usr/bin/nginx ] && ln -s /data/app/nginx/sbin/nginx /data/app/nginx/sbin/nginx
-[ ! -d /etc/nginx ] && ln -s /data/app/nginx/conf/ /etc/nginx
+[ ! -f /usr/sbin/nginx ] && ln -s ${NGINX_HOME}/sbin/nginx /usr/sbin/nginx
+[ ! -d /etc/nginx ] && ln -s ${NGINX_HOME}/conf/ /etc/nginx
 
-cat > /data/app/nginx/conf/nginx.conf << "EOF"
+cat > ${NGINX_HOME}/conf/nginx.conf << "EOF"
 #
 user nginx;
 worker_processes  auto;
@@ -154,8 +155,8 @@ http {
 }
 EOF
 
-[ ! -d /data/app/nginx/vhost ] && mkdir /data/app/nginx/vhost
-cat > /data/app/nginx/vhost/default.conf <<"EOF"
+[ ! -d ${NGINX_HOME}/conf/vhost ] && mkdir ${NGINX_HOME}/conf/vhost
+cat > ${NGINX_HOME}/conf/vhost/default.conf <<"EOF"
 #
 server {
     listen 80;
@@ -171,7 +172,7 @@ server {
 }
 EOF
 
-cat > /data/app/nginx/vhost/proxy.conf <<"EOF"
+cat > ${NGINX_HOME}/vhost/proxy.conf <<"EOF"
 #
 server_tokens off;
 sendfile on;
@@ -217,7 +218,7 @@ proxy_buffering off;
 proxy_cache off;
 proxy_set_header Host $host;
 proxy_set_header  X-Real-IP  $remote_addr;
-proxy_set_header   X-Forwarded-For  $proxy_add_x_forwarded_for;
+proxy_set_header  X-Forwarded-For  $proxy_add_x_forwarded_for;
 EOF
 
 echo "Config nginx system service..."
@@ -243,11 +244,11 @@ After=network.target nss-lookup.target
 Restart=always
 RestartSec=1
 Type=forking
-PIDFile=/data/app/nginx/logs/nginx.pid
-ExecStartPre=/data/app/nginx/sbin/nginx -t -q -g 'daemon on; master_process on;'
-ExecStart=/data/app/nginx/sbin/nginx -g 'daemon on; master_process on;'
-ExecReload=/data/app/nginx/sbin/nginx -g 'daemon on; master_process on;' -s reload
-ExecStop=-/sbin/start-stop-daemon --quiet --stop --retry QUIT/5 --pidfile /data/app/nginx/logs/nginx.pid
+PIDFile=${NGINX_HOME}/logs/nginx.pid
+ExecStartPre=${NGINX_HOME}/sbin/nginx -t -q -g 'daemon on; master_process on;'
+ExecStart=${NGINX_HOME}/sbin/nginx -g 'daemon on; master_process on;'
+ExecReload=${NGINX_HOME}/sbin/nginx -g 'daemon on; master_process on;' -s reload
+ExecStop=-/sbin/start-stop-daemon --quiet --stop --retry QUIT/5 --pidfile ${NGINX_HOME}/logs/nginx.pid
 TimeoutStopSec=5
 KillMode=mixed
 
