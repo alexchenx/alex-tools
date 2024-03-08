@@ -3,7 +3,8 @@
 # Quick install:
 # curl -sfL https://raw.githubusercontent.com/alexchenx/alex-tools/master/install-nginx.sh | sh -
 
-nginx_version="1.24.0"
+VERSION="1.24.0"
+NGINX_HOME="/data/app/nginx"
 
 # Check root
 [ "$(whoami)" != "root" ] && {
@@ -68,15 +69,14 @@ download() {
   fi
 }
 
-green_echo ">>>Download nginx-${nginx_version} ..."
-download "http://nginx.org/download/nginx-${nginx_version}.tar.gz" "nginx-${nginx_version}.tar.gz"
+green_echo ">>>Download nginx-${VERSION} ..."
+download "http://nginx.org/download/nginx-${VERSION}.tar.gz" "nginx-${VERSION}.tar.gz"
 
 green_echo ">>>Install nginx..."
 cd /tmp/ || exit
-[ -d "nginx-${nginx_version}" ] && rm -rf nginx-${nginx_version}
+[ -d "nginx-${VERSION}" ] && rm -rf nginx-${VERSION}
 
-NGINX_HOME="/data/app/nginx"
-tar -zxf nginx-${nginx_version}.tar.gz && cd nginx-${nginx_version} || exit
+tar -zxf nginx-${VERSION}.tar.gz && cd nginx-${VERSION} || exit
 echo "Doing configure..."
 ./configure --prefix=${NGINX_HOME} \
             --with-http_ssl_module \
@@ -126,7 +126,7 @@ http {
 
     access_log  logs/access.log  main;
 
-    include conf.d/*.conf;
+    include vhost/*.conf;
 
     # cloudflare IP 识别
     set_real_ip_from 173.245.48.0/20;
