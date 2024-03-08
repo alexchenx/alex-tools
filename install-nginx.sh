@@ -101,7 +101,7 @@ fi
 
 
 echo "Config nginx..."
-cat > /data/app/nginx/conf/nginx.conf << "EOF"
+cat > /etc/nginx/nginx.conf << "EOF"
 #
 user nginx;
 worker_processes  auto;
@@ -126,7 +126,7 @@ http {
 
     access_log  logs/access.log  main;
 
-    include vhost/*.conf;
+    include conf.d/*.conf;
 
     # cloudflare IP 识别
     set_real_ip_from 173.245.48.0/20;
@@ -155,8 +155,8 @@ http {
 }
 EOF
 
-[ ! -d /data/app/nginx/conf/vhost ] && mkdir /data/app/nginx/conf/vhost
-cat > /data/app/nginx/conf/vhost/default.conf <<"EOF"
+[ ! -d /etc/nginx/conf.d ] && mkdir /etc/nginx/conf.d
+cat > /etc/nginx/conf.d/default.conf <<"EOF"
 #
 server {
     listen 80;
@@ -172,7 +172,7 @@ server {
 }
 EOF
 
-cat > /data/app/nginx/conf/vhost/proxy.conf <<"EOF"
+cat > /etc/nginx/conf.d/proxy.conf <<"EOF"
 #
 server_tokens off;
 sendfile on;
