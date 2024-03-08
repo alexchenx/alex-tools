@@ -78,9 +78,6 @@ cd /tmp/ || exit
 tar -zxf nginx-${nginx_version}.tar.gz && cd nginx-${nginx_version} || exit
 echo "Doing configure..."
 ./configure --prefix=/data/app/nginx \
-            --sbin-path=/usr/sbin/nginx \
-            --conf-path=/etc/nginx/nginx.conf \
-            --pid-path=/run/nginx.pid \
             --with-http_ssl_module \
             --with-http_stub_status_module \
             --with-http_v2_module \
@@ -99,9 +96,11 @@ if ! make install >/dev/null 2>&1; then
   exit 1
 fi
 
-
 echo "Config nginx..."
-cat > /etc/nginx/nginx.conf << "EOF"
+[ ! -f /usr/bin/nginx ] && ln -s /data/app/nginx/sbin/nginx /data/app/nginx/sbin/nginx
+[ ! -d /etc/nginx ] && ln -s /data/app/nginx/conf/ /etc/nginx
+
+cat > /data/app/nginx/conf/nginx.conf << "EOF"
 #
 user nginx;
 worker_processes  auto;
@@ -155,8 +154,8 @@ http {
 }
 EOF
 
-[ ! -d /etc/nginx/conf.d ] && mkdir /etc/nginx/conf.d
-cat > /etc/nginx/conf.d/default.conf <<"EOF"
+[ ! -d /data/app/nginx/vhost ] && mkdir /data/app/nginx/vhost
+cat > /data/app/nginx/vhost/default.conf <<"EOF"
 #
 server {
     listen 80;
@@ -172,7 +171,7 @@ server {
 }
 EOF
 
-cat > /etc/nginx/conf.d/proxy.conf <<"EOF"
+cat > /data/app/nginx/vhost/proxy.conf <<"EOF"
 #
 server_tokens off;
 sendfile on;
@@ -244,11 +243,11 @@ After=network.target nss-lookup.target
 Restart=always
 RestartSec=1
 Type=forking
-PIDFile=/run/nginx.pid
-ExecStartPre=/usr/sbin/nginx -t -q -g 'daemon on; master_process on;'
-ExecStart=/usr/sbin/nginx -g 'daemon on; master_process on;'
-ExecReload=/usr/sbin/nginx -g 'daemon on; master_process on;' -s reload
-ExecStop=-/sbin/start-stop-daemon --quiet --stop --retry QUIT/5 --pidfile /run/nginx.pid
+PIDFile=/data/app/nginx/logs/nginx.pid
+ExecStartPre=/data/app/nginx/sbin/nginx -t -q -g 'daemon on; master_process on;'
+ExecStart=/data/app/nginx/sbin/nginx -g 'daemon on; master_process on;'
+ExecReload=/data/app/nginx/sbin/nginx -g 'daemon on; master_process on;' -s reload
+ExecStop=-/sbin/start-stop-daemon --quiet --stop --retry QUIT/5 --pidfile /data/app/nginx/logs/nginx.pid
 TimeoutStopSec=5
 KillMode=mixed
 
