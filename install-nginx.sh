@@ -172,7 +172,7 @@ server {
 }
 EOF
 
-cat > ${NGINX_HOME}/vhost/proxy.conf <<"EOF"
+cat > ${NGINX_HOME}/conf/vhost/proxy.conf <<"EOF"
 #
 server_tokens off;
 sendfile on;
