@@ -100,7 +100,7 @@ fi
 green_echo ">>>Config nginx..."
 cat > /data/app/nginx/conf/nginx.conf << "EOF"
 #
-user root;
+user nginx;
 worker_processes  auto;
 error_log  logs/error.log;
 
@@ -234,7 +234,7 @@ cat >/lib/systemd/system/nginx.service <<EOF
 #
 [Unit]
 Description=A high performance web server and a reverse proxy server
-Documentation=man:nginx(8)
+Documentation=https://nginx.org/en/docs/
 After=network.target nss-lookup.target
 
 [Service]
