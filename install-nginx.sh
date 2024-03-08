@@ -97,7 +97,7 @@ if ! make install >/dev/null 2>&1; then
 fi
 
 
-green_echo ">>>Config nginx..."
+echo ">>>Config nginx..."
 cat > /data/app/nginx/conf/nginx.conf << "EOF"
 #
 user nginx;
@@ -218,7 +218,7 @@ proxy_set_header  X-Real-IP  $remote_addr;
 proxy_set_header   X-Forwarded-For  $proxy_add_x_forwarded_for;
 EOF
 
-green_echo ">>>Setup nginx to system service... "
+echo ">>>Config nginx system service..."
 cat >/lib/systemd/system/nginx.service <<EOF
 # Stop dance for nginx
 # =======================
@@ -255,7 +255,7 @@ EOF
 systemctl daemon-reload
 systemctl enable nginx
 
-echo "Start nginx service."
+echo "Start nginx service..."
 if systemctl start nginx; then
     green_echo "Started."
 fi
