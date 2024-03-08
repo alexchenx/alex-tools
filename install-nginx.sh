@@ -97,7 +97,7 @@ if ! make install >/dev/null 2>&1; then
 fi
 
 
-echo ">>>Config nginx..."
+echo "Config nginx..."
 cat > /data/app/nginx/conf/nginx.conf << "EOF"
 #
 user nginx;
@@ -218,7 +218,7 @@ proxy_set_header  X-Real-IP  $remote_addr;
 proxy_set_header   X-Forwarded-For  $proxy_add_x_forwarded_for;
 EOF
 
-echo ">>>Config nginx system service..."
+echo "Config nginx system service..."
 cat >/lib/systemd/system/nginx.service <<EOF
 # Stop dance for nginx
 # =======================
