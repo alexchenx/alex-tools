@@ -15,10 +15,10 @@ NGINX_HOME="/data/app/nginx"
 # Check OS
 if [ -f /etc/redhat-release ] && [ "$(grep ' 7.' /etc/redhat-release | grep -iEc 'centos|Red Hat')" -eq 1 ]; then
   os="centos"
-elif [ "$(grep 'Ubuntu' /etc/issue | grep -cE '20|22')" -eq 1 ]; then
+elif [ "$(grep 'Ubuntu' /etc/issue | grep -cE '20|22|24')" -eq 1 ]; then
   os="ubuntu"
 else
-  echo "This script only support CentOS 7 and Ubuntu 20, 22."
+  echo "This script only support CentOS 7 and Ubuntu 20, 22, 24."
   exit 1
 fi
 
