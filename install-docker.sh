@@ -1,7 +1,7 @@
 #!/bin/bash
 # Description: auto install docker-ce on CentOS 7 and Ubuntu 20, 22, 24
 # Quick install:
-# curl -sfL https://raw.githubusercontent.com/alexchenx/alex-tools/master/install-docker.sh | sh -
+# curl -sfL https://raw.githubusercontent.com/alexchenx/alex-tools/master/install-docker.sh | sh -s -- -a install
 
 DOCKER_VERSION="24.0.7"
 DOCKER_COMPOSE_VERSION="v2.24.0"
