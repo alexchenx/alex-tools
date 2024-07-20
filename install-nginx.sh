@@ -1,5 +1,5 @@
 #!/bin/bash
-# Description: This script is use for install nginx on CentOS 7 and Ubuntu 20, 22.
+# Description: This script is use for install nginx on CentOS 7 and Ubuntu 20, 22, 24.
 # Quick install:
 # curl -sfL https://raw.githubusercontent.com/alexchenx/alex-tools/master/install-nginx.sh | sh -
 
@@ -179,10 +179,10 @@ sendfile on;
 tcp_nopush on;
 tcp_nodelay on;
 keepalive_timeout 65;
-client_header_buffer_size 2k;
+client_header_buffer_size 32k;
 client_body_buffer_size 256k;
 client_body_in_single_buffer on;
-large_client_header_buffers 4 4k;
+large_client_header_buffers 4 32k;
 client_max_body_size 100m;
 
 fastcgi_connect_timeout 300;
