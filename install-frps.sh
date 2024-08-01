@@ -11,6 +11,21 @@ install(){
     tar -zxvf frp_${VERSION}_linux_amd64.tar.gz -C /usr/local/
     echo "清理安装包..."
     rm -rfv frp_${VERSION}_linux_amd64.tar.gz
+    echo "设置配置文件..."
+    cat > /usr/local/frp_${VERSION}_linux_amd64/frps.toml <<EOF
+# 监听端口
+bindPort = 7000
+# 身份验证
+auth.token = "ry00JmUuNclD7cIkSEWW"
+# 设置http及https协议下代理端口
+vhostHTTPPort = 7080
+vhostHTTPSPort = 7443
+# dashboard 端口以及用户名密码
+webServer.addr = "0.0.0.0"
+webServer.port = 7500
+webServer.user = "admin"
+webServer.password = "password"
+EOF
     echo "设置系统服务..."
     cat > /etc/systemd/system/frps.service <<EOF
 [Unit]
@@ -41,7 +56,7 @@ EOF
     启动frps服务: systemctl start frps
     停止frps服务: systemctl stop frps
     重启frps服务: systemctl restart frps
-    查看frps服务状态: systemctl restart frps
+    查看frps服务状态: systemctl status frps
     """
 }
 
