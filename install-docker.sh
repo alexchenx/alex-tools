@@ -64,13 +64,18 @@ while :; do
 done
 
 DOCKER_DOWNLOAD_LINK="https://download.docker.com/linux/static/stable/x86_64/docker-${DOCKER_VERSION}.tgz"
-DOCKER_COMPOSE_DOWNLOAD_LIKE="https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-linux-x86_64"
-[ "${SOURCE}" = "cn" ] && DOCKER_DOWNLOAD_LINK="https://mirrors.aliyun.com/docker-ce/linux/static/stable/x86_64/docker-${DOCKER_VERSION}.tgz"
+DOCKER_COMPOSE_DOWNLOAD_LINK="https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-linux-x86_64"
+DOCKER_COMPOSE_COMPLETION_DOWNLOAD_LINK="https://raw.githubusercontent.com/docker/compose/refs/heads/v1/contrib/completion/bash/docker-compose"
+if [ "${SOURCE}" = "cn" ]; then
+    DOCKER_DOWNLOAD_LINK="https://mirrors.aliyun.com/docker-ce/linux/static/stable/x86_64/docker-${DOCKER_VERSION}.tgz"
+    DOCKER_COMPOSE_DOWNLOAD_LINK="https://software.chenxie.net/docker-compose/${DOCKER_COMPOSE_VERSION}/docker-compose-linux-x86_64"
+    DOCKER_COMPOSE_COMPLETION_DOWNLOAD_LINK="https://software.chenxie.net/docker-compose/docker-compose_bash_completion_v1"
+fi
 
 # Check root
 [ "$UID" -ne 0 ] && {
-  echo "Must be root run this script."
-  exit 1
+    echo "Must be root run this script."
+    exit 1
 }
 
 # Load OS info
@@ -82,7 +87,7 @@ centos|ubuntu)
     ;;
 *)
     echo "OS: ${ID}"
-    echo "This script only support CentOS and Ubuntu."
+    echo "Only support CentOS and Ubuntu."
     exit 1
     ;;
 esac
@@ -93,34 +98,58 @@ echo_green() {
 }
 
 echo_red() {
-  msg=$1
-  echo -e "\033[31m${msg}\033[0m"
+    msg=$1
+    echo -e "\033[31m${msg}\033[0m"
 }
 
-# Install iptables
-if ! command -v iptables >/dev/null 2>&1; then
-    echo_green "Installing iptables..."
-    case "${ID}" in
-    ubuntu)
-        export NEEDRESTART_MODE="a"
-        apt-get update && apt-get install -y --no-install-recommends iptables
-        ;;
-    centos)
-        if command -v dnf >/dev/null 2>&1; then
-            dnf install -y iptables
-        else
-            yum install -y iptables
-        fi
-        ;;
-    *)
-        echo "OS: ${ID}"
-        echo "This script only support CentOS and Ubuntu."
-        exit 1
-        ;;
-    esac
-fi
+check_iptables(){
+    if ! command -v iptables >/dev/null 2>&1; then
+        echo_green "Installing iptables..."
+        case "${ID}" in
+        ubuntu)
+            export NEEDRESTART_MODE="a"
+            apt-get update && apt-get install -y --no-install-recommends iptables
+            ;;
+        centos)
+            if command -v dnf >/dev/null 2>&1; then
+                dnf install -y iptables
+            else
+                yum install -y iptables
+            fi
+            ;;
+        *)
+            echo "OS: ${ID}"
+            echo "Only support CentOS and Ubuntu."
+            exit 1
+            ;;
+        esac
+    fi
+}
+
+check_bash_completion(){
+    if [ ! -f /usr/share/bash-completion/bash_completion ] ; then
+        echo_green "Installing bash-completion..."
+        case "${ID}" in
+        ubuntu)
+            apt-get update && apt-get install -y --no-install-recommends bash-completion
+            ;;
+        centos)
+            if command -v dnf >/dev/null 2>&1; then
+                dnf install -y bash-completion
+            else
+                yum install -y bash-completion
+            fi
+            ;;
+        *)
+            echo "Unsupported OS: ${ID}"
+            exit 1
+            ;;
+        esac
+    fi
+}
 
 install_docker() {
+    check_iptables
     if systemctl status docker >/dev/null 2>&1; then
         echo "It looks docker is running, please stop or uninstall it first."
         exit 1
@@ -129,7 +158,6 @@ install_docker() {
     [ -f /tmp/docker-"${DOCKER_VERSION}".tgz ] && rm -rf /tmp/docker-"${DOCKER_VERSION}".tgz
     [ -d /tmp/docker/ ] && rm -rf /tmp/docker
 
-    echo "Install docker..."
     echo "Download from: $DOCKER_DOWNLOAD_LINK"
     if ! curl -SL "${DOCKER_DOWNLOAD_LINK}" -o /tmp/docker-"${DOCKER_VERSION}".tgz; then
         echo_red "Download failed."
@@ -143,9 +171,6 @@ install_docker() {
   "data-root": "${DATA_ROOT}"
 }
 EOF
-    echo "Install bash_completion..."
-    mkdir -p /etc/bash_completion.d
-    curl -L https://raw.githubusercontent.com/docker/docker-ce/master/components/cli/contrib/completion/bash/docker -o /etc/bash_completion.d/docker.sh
     cat >/lib/systemd/system/docker.service <<"EOF"
 [Unit]
 Description=Docker Application Container Engine
@@ -210,11 +235,11 @@ uninstall_docker() {
 }
 
 install_docker_compose() {
-    echo ""
+    echo
     echo_green ">>>Installing docker-compose..."
     [ -f /usr/local/bin/docker-compose ] && rm -rf /usr/local/bin/docker-compose
-    echo "Download from: $DOCKER_COMPOSE_DOWNLOAD_LIKE"
-    if curl -SL "${DOCKER_COMPOSE_DOWNLOAD_LIKE}" -o /usr/local/bin/docker-compose && chmod +x /usr/local/bin/docker-compose >/dev/null 2>&1; then
+    echo "Download from: $DOCKER_COMPOSE_DOWNLOAD_LINK"
+    if curl -SL "${DOCKER_COMPOSE_DOWNLOAD_LINK}" -o /usr/local/bin/docker-compose && chmod +x /usr/local/bin/docker-compose >/dev/null 2>&1; then
         DOCKER_CONFIG=$HOME/.docker
         mkdir -p "${DOCKER_CONFIG}"/cli-plugins
         cp /usr/local/bin/docker-compose "${DOCKER_CONFIG}"/cli-plugins/
@@ -232,20 +257,38 @@ uninstall_docker_compose() {
     echo "docker-compose uninstalled."
 }
 
+install_bash_completion() {
+    echo
+    echo_green ">>>Installing bash completion..."
+    check_bash_completion
+    # docker
+    mkdir -p /etc/bash_completion.d
+    docker completion bash > /etc/bash_completion.d/docker
+    # docker-compose
+    curl -L ${DOCKER_COMPOSE_COMPLETION_DOWNLOAD_LINK} -o /etc/bash_completion.d/docker-compose
+    echo_green ">>>Done."
+}
+
+uninstall_bash_completion() {
+    rm -rfv /etc/bash_completion.d/docker
+    rm -rfv /etc/bash_completion.d/docker-compose
+}
+
 case "$ACTION" in
 install)
     install_docker
     install_docker_compose
+    install_bash_completion
     echo
     echo_green "#################### Verify ####################"
     docker -v
     docker-compose version
-    docker compose version
     echo_green "################################################"
     ;;
 uninstall)
     uninstall_docker
     uninstall_docker_compose
+    uninstall_bash_completion
     ;;
 *)
     usage
