@@ -3,132 +3,162 @@
 # Quick install:
 # curl -sfL https://raw.githubusercontent.com/alexchenx/alex-tools/master/install-nginx.sh | sh -
 
-VERSION="1.24.0"
+# set -e 作用: 一旦脚本中的某个命令返回非 0（出错），立即退出整个脚本， 不用再自行判断命令是否执行成功。
+set -e
+
+NGINX_VERSION="1.24.0"
 NGINX_HOME="/data/app/nginx"
+NGINX_USER="nginx"
+NGINX_SITES_DIR="${NGINX_HOME}/conf/conf.d"
 
-# Check root
-[ "$(whoami)" != "root" ] && {
-  echo "Must be root run this script."
-  exit 1
-}
-
-# Check OS
-if [ -f /etc/redhat-release ] && [ "$(grep ' 7.' /etc/redhat-release | grep -iEc 'centos|Red Hat')" -eq 1 ]; then
-  os="centos"
-elif [ "$(grep 'Ubuntu' /etc/issue | grep -cE '20|22|24')" -eq 1 ]; then
-  os="ubuntu"
-else
-  echo "This script only support CentOS 7 and Ubuntu 20, 22, 24."
-  exit 1
+if [[ $EUID -ne 0 ]]; then
+    echo "请使用 root 用户运行该脚本。"
+    exit 1
 fi
 
-len_echo() {
-  msg=$1
-  printf "[$(date +%T)] %-40s" "${msg}"
+OS=""
+if [[ -f /etc/os-release ]]; then
+    . /etc/os-release
+    case "$ID" in
+    centos)
+        [[ "$VERSION_ID" =~ ^7 ]] || { echo "仅支持 CentOS 7"; exit 1; }
+        OS="centos"
+    ;;
+    ubuntu)
+        [[ "$VERSION_ID" =~ ^(20|22|24) ]] || { echo "仅支持 Ubuntu 20/22/24"; exit 1; }
+        OS="ubuntu"
+        ;;
+    *)
+        echo "不支持的系统: $ID"; exit 1
+    ;;
+    esac
+else
+    echo "无法检测操作系统类型"; exit 1
+fi
+
+echo_green() {
+    msg=$1
+    echo -e "\033[32m${msg}\033[0m"
 }
 
-green_echo() {
-  msg=$1
-  echo -e "\033[32m${msg}\033[0m"
+echo_red() {
+    msg=$1
+    echo -e "\033[31m${msg}\033[0m"
 }
 
-red_echo() {
-  msg=$1
-  echo -e "\033[31m${msg}\033[0m"
-}
+echo_green "安装依赖..."
+if [[ "$OS" == "centos" ]]; then
+    yum install -y gcc make pcre pcre-devel zlib zlib-devel openssl openssl-devel curl > /dev/null
+elif [[ "$OS" == "ubuntu" ]]; then
+    apt-get update > /dev/null
+    DEBIAN_FRONTEND=noninteractive apt-get install -y build-essential libpcre3 libpcre3-dev zlib1g-dev libssl-dev curl > /dev/null
+fi
 
-# Create group and user
-[ "$(grep -c "nginx" /etc/group)" -ge 1 ] || groupadd nginx
-[ "$(grep -c "nginx" /etc/passwd)" -ge 1 ] || useradd -s /sbin/nologin -M -g nginx -G root nginx
+echo_green "检查并创建 nginx 用户..."
+id -u ${NGINX_USER} &>/dev/null || useradd -r -M -s /sbin/nologin ${NGINX_USER}
 
-green_echo ">>>Installing dependency packages... "
-case "${os}" in
-"centos")
-  if ! yum -y install gcc pcre-devel openssl openssl-devel make 1>/dev/null; then
-    red_echo "failed."
-    exit 1
-  fi
-  ;;
-"ubuntu")
-  if export NEEDRESTART_MODE="a" && apt-get update 1>/dev/null && ! apt-get install -y libpcre3 libpcre3-dev libssl-dev 1>/dev/null; then
-    red_echo "failed."
-    exit 1
-  fi
-  ;;
-esac
-
-download() {
-  url="$1"
-  filename="$2"
-  cd /tmp/ || exit
-  [ -f "${filename}" ] && rm -rf "${filename}"
-  echo "Download from: ${url}"
-  if ! curl -SL "${url}" -o "${filename}"; then
-    red_echo "failed."
-    exit 1
-  fi
-}
-
-green_echo ">>>Download nginx-${VERSION} ..."
-download "http://nginx.org/download/nginx-${VERSION}.tar.gz" "nginx-${VERSION}.tar.gz"
-
-green_echo ">>>Install nginx..."
+echo_green "下载 Nginx..."
 cd /tmp/ || exit
-[ -d "nginx-${VERSION}" ] && rm -rf nginx-${VERSION}
+rm -rf nginx-${NGINX_VERSION}.tar.gz
+rm -rf "nginx-${NGINX_VERSION}"
+curl -SL "http://nginx.org/download/nginx-${NGINX_VERSION}.tar.gz" -o "nginx-${NGINX_VERSION}.tar.gz" || { echo_red "下载失败！"; exit 1; }
+tar -zxf nginx-${NGINX_VERSION}.tar.gz
+cd nginx-${NGINX_VERSION}
 
-tar -zxf nginx-${VERSION}.tar.gz && cd nginx-${VERSION} || exit
-echo "Doing configure..."
+echo_green "编译并安装 Nginx..."
+[ -d "${NGINX_HOME}" ] && mv "${NGINX_HOME}" "${NGINX_HOME}.old_$(date +%Y%m%d_%H%M)"
+echo "Doing configure"
 ./configure --prefix=${NGINX_HOME} \
+            --user=${NGINX_USER} \
+            --group=${NGINX_USER} \
             --with-http_ssl_module \
             --with-http_stub_status_module \
             --with-http_v2_module \
             --with-http_realip_module \
-            --with-stream_realip_module
+            --with-stream_realip_module \
+            --with-http_gzip_static_module \
+            --with-http_slice_module \
+            --with-threads \
+            --with-file-aio \
+            --with-stream \
+            --with-stream_ssl_module \
+            --with-http_auth_request_module \
+            --with-stream_ssl_preread_module \
+             > /dev/null
 
-echo "Doing make..."
-if ! make >/dev/null 2>&1; then
-  red_echo "failed."
-  exit 1
-fi
+echo "Doing make"
+make -j"$(nproc)" > /dev/null
+echo "Doing make install"
+make install > /dev/null
 
-echo "Doing make install..."
-if ! make install >/dev/null 2>&1; then
-  red_echo "failed."
-  exit 1
-fi
+echo_green "配置路径结构..."
+mkdir -p ${NGINX_SITES_DIR}
+mkdir -p ${NGINX_HOME}/logs
+mkdir -p ${NGINX_HOME}/temp
 
-echo "Config nginx..."
-[ ! -f /usr/sbin/nginx ] && ln -s ${NGINX_HOME}/sbin/nginx /usr/sbin/nginx
-[ ! -d /etc/nginx ] && ln -s ${NGINX_HOME}/conf/ /etc/nginx
+echo_green "配置软链接..."
+rm -rf /usr/sbin/nginx && ln -s ${NGINX_HOME}/sbin/nginx /usr/sbin/nginx
+rm -rf /etc/nginx && ln -s ${NGINX_HOME}/conf /etc/nginx
 
-cat > ${NGINX_HOME}/conf/nginx.conf << "EOF"
-#
-user nginx;
-worker_processes  auto;
-error_log  logs/error.log;
+echo_green "修改 nginx.conf..."
+cat > ${NGINX_HOME}/conf/nginx.conf <<EOF
+user ${NGINX_USER};
+worker_processes auto;
+worker_rlimit_nofile 65535;
 
 events {
     use epoll;
-    worker_connections  65535;
+    worker_connections 10240;
+    multi_accept on;
 }
-
-worker_rlimit_nofile 102400;
 
 http {
     include       mime.types;
     default_type  application/octet-stream;
+
+    # Basic Settings
+    sendfile        on;
+    aio             threads;
+    tcp_nopush      on;
+    tcp_nodelay     on;
+    keepalive_timeout 65;
+    server_tokens off;
+    autoindex off;
     server_names_hash_bucket_size 128;
 
-    log_format  main escape=json '$remote_addr - $remote_user [$time_local] "$request" '
-                      '$status $body_bytes_sent "$http_referer" '
-                      '"$http_user_agent" "$http_x_forwarded_for" '
-                      '"$request_body" "$upstream_addr" $request_time $upstream_response_time';
+    # 代理性能优化
+    proxy_http_version 1.1;
+    proxy_buffering on;
+    proxy_buffer_size 4k;
+    proxy_buffers 8 16k;
+    proxy_busy_buffers_size 32k;
+    proxy_temp_file_write_size 64k;
+    proxy_read_timeout 60s;
+    proxy_connect_timeout 60s;
+    proxy_send_timeout 60s;
 
-    access_log  logs/access.log  main;
+    # -------- Gzip 压缩 --------
+    gzip on;
+    gzip_static on;
+    gzip_min_length 1k;
+    gzip_comp_level 6;
+    gzip_types text/plain text/css application/json application/javascript application/xml;
 
-    include vhost/*.conf;
+    # 安全 headers
+    add_header X-Content-Type-Options nosniff;
+    add_header X-Frame-Options SAMEORIGIN;
+    add_header X-XSS-Protection "1; mode=block";
 
-    # cloudflare IP 识别
+    # -------- 实时日志格式 --------
+    log_format main '\$remote_addr - \$remote_user [\$time_local] "\$request" '
+                    '\$status \$body_bytes_sent "\$http_referer" '
+                    '"\$http_user_agent" "\$http_x_forwarded_for"';
+
+    access_log logs/access.log main;
+    error_log logs/error.log warn;
+
+    # -------- Cloudflare IP 支持 --------
+    real_ip_header CF-Connecting-IP;
     set_real_ip_from 173.245.48.0/20;
     set_real_ip_from 103.21.244.0/22;
     set_real_ip_from 103.22.200.0/22;
@@ -151,114 +181,88 @@ http {
     set_real_ip_from 2405:8100::/32;
     set_real_ip_from 2a06:98c0::/29;
     set_real_ip_from 2c0f:f248::/32;
-    real_ip_header x-forwarded-for;
-}
-EOF
+    real_ip_recursive on;
 
-[ ! -d ${NGINX_HOME}/conf/vhost ] && mkdir ${NGINX_HOME}/conf/vhost
-cat > ${NGINX_HOME}/conf/vhost/default.conf <<"EOF"
-#
-server {
-    listen 80;
-    server_name localhost;
+    include ${NGINX_SITES_DIR}/*.conf;
 
-    access_log logs/access.log main;
-    error_log  logs/error.log;
+    # -------- 默认访问页--------
+    server {
+        listen 80;
+        server_name localhost;
 
-    location / {
-        root html;
-        index index.html;
+        access_log logs/access.log main;
+        error_log  logs/error.log;
+
+        location / {
+            root html;
+            index index.html;
+        }
     }
 }
+
+# -------- 四层 TCP 代理配置 --------
+stream {
+    log_format proxy '\$remote_addr [\$time_local] \$protocol '
+                     '\$status \$bytes_sent \$bytes_received '
+                     '\$session_time "\$upstream_addr"';
+
+    access_log logs/stream_access.log proxy;
+
+    include ${NGINX_SITES_DIR}/*.tconf;
+}
 EOF
 
-cat > ${NGINX_HOME}/conf/vhost/proxy.conf <<"EOF"
+cat > ${NGINX_SITES_DIR}/example-http.conf <<"EOF"
+#server {
+#    listen 80;
+#    server_name api.example.com;
 #
-server_tokens off;
-sendfile on;
-tcp_nopush on;
-tcp_nodelay on;
-keepalive_timeout 65;
-client_header_buffer_size 32k;
-client_body_buffer_size 256k;
-client_body_in_single_buffer on;
-large_client_header_buffers 4 32k;
-client_max_body_size 100m;
-
-fastcgi_connect_timeout 300;
-fastcgi_send_timeout 300;
-fastcgi_read_timeout 300;
-fastcgi_buffer_size 128k;
-fastcgi_buffers 2 256k;
-fastcgi_busy_buffers_size 256k;
-fastcgi_temp_file_write_size 256k;
-fastcgi_intercept_errors on;
-
-open_file_cache max=204800 inactive=20s;
-open_file_cache_min_uses 1;
-open_file_cache_valid 30s;
-
-gzip on;
-gzip_min_length 1k;
-gzip_buffers     4 16k;
-gzip_http_version 1.1;
-gzip_comp_level 2;
-gzip_types text/plain text/xml text/css application/javascript application/json application/font-woff application/x-shockwave-flash image/png image/jpeg image/gif;
-gzip_vary on;
-gzip_disable "MSIE [1-6]\.";
-
-proxy_connect_timeout   300;
-proxy_send_timeout      300;
-proxy_read_timeout      300;
-proxy_buffer_size      256k;
-proxy_buffers          4 256k;
-proxy_busy_buffers_size 256k;
-proxy_temp_file_write_size 256k;
-proxy_buffering off;
-proxy_cache off;
-proxy_set_header Host $host;
-proxy_set_header  X-Real-IP  $remote_addr;
-proxy_set_header  X-Forwarded-For  $proxy_add_x_forwarded_for;
+#    access_log logs/api.example.com_access.log main;
+#    error_log logs/api.example.com_error.log;
+#
+#    location / {
+#        proxy_pass http://127.0.0.1:8080;
+#        proxy_set_header Host $host;
+#        proxy_set_header X-Real-IP $remote_addr;
+#        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+#        proxy_set_header X-Forwarded-Proto $scheme;
+#    }
+#}
 EOF
 
-echo "Config nginx system service..."
-cat >/lib/systemd/system/nginx.service <<EOF
-# Stop dance for nginx
-# =======================
-#
-# ExecStop sends SIGSTOP (graceful stop) to the nginx process.
-# If, after 5s (--retry QUIT/5) nginx is still running, systemd takes control
-# and sends SIGTERM (fast shutdown) to the main process.
-# After another 5s (TimeoutStopSec=5), and if nginx is alive, systemd sends
-# SIGKILL to all the remaining processes in the process group (KillMode=mixed).
-#
-# nginx signals reference doc:
-# http://nginx.org/en/docs/control.html
-#
+cat > ${NGINX_SITES_DIR}/example-tcp.tconf <<"EOF"
+#server {
+#    listen 3306;
+#    proxy_pass 192.168.1.5:3306;
+#}
+EOF
+
+echo_green "设置 systemd 服务..."
+cat > /etc/systemd/system/nginx.service <<EOF
 [Unit]
-Description=A high performance web server and a reverse proxy server
-Documentation=https://nginx.org/en/docs/
-After=network.target nss-lookup.target
+Description=The NGINX HTTP and reverse proxy server
+After=network.target
 
 [Service]
-Restart=always
-RestartSec=1
 Type=forking
+ExecStartPre=${NGINX_HOME}/sbin/nginx -t
+ExecStart=${NGINX_HOME}/sbin/nginx
+ExecReload=${NGINX_HOME}/sbin/nginx -s reload
+ExecStop=${NGINX_HOME}/sbin/nginx -s quit
 PIDFile=${NGINX_HOME}/logs/nginx.pid
-ExecStartPre=${NGINX_HOME}/sbin/nginx -t -q -g 'daemon on; master_process on;'
-ExecStart=${NGINX_HOME}/sbin/nginx -g 'daemon on; master_process on;'
-ExecReload=${NGINX_HOME}/sbin/nginx -g 'daemon on; master_process on;' -s reload
-ExecStop=-/sbin/start-stop-daemon --quiet --stop --retry QUIT/5 --pidfile ${NGINX_HOME}/logs/nginx.pid
-TimeoutStopSec=5
-KillMode=mixed
+Restart=on-failure
+LimitNOFILE=65535
 
 [Install]
 WantedBy=multi-user.target
 EOF
+
 systemctl daemon-reload
 systemctl enable nginx
-
-echo "Start nginx service..."
-if systemctl start nginx; then
-    green_echo "Started."
+systemctl restart nginx
+if systemctl status nginx &>/dev/null; then
+    echo "Nginx 启动成功，安装完成！"
+    cd /tmp && rm -rf "nginx-${NGINX_VERSION}" "nginx-${NGINX_VERSION}.tar.gz"
+else
+    echo_red "Nginx 启动失败，请检查日志"
 fi
