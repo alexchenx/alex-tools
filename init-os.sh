@@ -40,13 +40,14 @@ check_os() {
 }
 
 do_init() {
+    echo "####################################### 升级和安装软件包 #########################################"
     case "${OS}" in
     ubuntu)
-        apt -y update && apt -y upgrade
+        # apt -y update && NEEDRESTART_MODE=a apt -y upgrade
         apt -y update && NEEDRESTART_MODE=a apt -y install bash-completion htop iftop iotop vim wget curl xfsprogs nfs-common net-tools iptables iputils-ping
         ;;
     centos)
-        yum -y update
+        # yum -y update
         yum -y install bash-completion htop iftop iotop vim wget curl xfsprogs nfs-utils net-tools iptables iputils-ping
         ;;
     *)
@@ -55,26 +56,29 @@ do_init() {
         ;;
     esac
 
+    echo "####################################### 配置时间显示格式 #########################################"
     hist_time_format="export HISTTIMEFORMAT=\"%Y-%m-%d %H:%M:%S \$(whoami) \""
     if ! grep -qF "${hist_time_format}" /etc/profile; then
         echo "${hist_time_format}" >> /etc/profile
     fi
 
+    echo "####################################### 配置ll别名 #########################################"
     alias_ll="alias ll='ls -lhtr --time-style=long-iso --color'"
     if ! grep -qF "${alias_ll}" ~/.bashrc; then
         echo "${alias_ll}" >> ~/.bashrc
     fi
 
-    if [ -d /etc/vim ]; then
-        vimrc_file="/etc/vim/vimrc.local"
-    else
-        vimrc_file="/etc/vimrc"
-    fi
+    echo "####################################### 配置vim #########################################"
+    vimrc_file="/etc/vim/vimrc.local"
+    touch "${vimrc_file}"
     for setting in "set paste" "set nu"; do
         grep -qxF "$setting" "$vimrc_file" || echo "$setting" >> "$vimrc_file"
     done
 
+    echo "####################################### 配置时区 #########################################"
     timedatectl set-timezone Asia/Shanghai
+
+    echo "！！！ 请重启系统以应用所有更改 ！！！"
 }
 
 main() {
