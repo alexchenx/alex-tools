@@ -42,7 +42,7 @@ check_os() {
 do_init() {
     case "${OS}" in
     ubuntu)
-        apt -y update && apt list --upgradeable && apt -y upgrade
+        apt -y update && apt -y upgrade
         apt -y update && NEEDRESTART_MODE=a apt -y install bash-completion htop iftop iotop vim wget curl xfsprogs nfs-common net-tools iptables iputils-ping
         ;;
     centos)
@@ -65,16 +65,16 @@ do_init() {
         echo "${alias_ll}" >> ~/.bashrc
     fi
 
-    vim_settings="set paste\nset nu\n"
     if [ -d /etc/vim ]; then
-        echo -e "${vim_settings}" >> /etc/vim/vimrc.local
+        vimrc_file="/etc/vim/vimrc.local"
     else
-        echo -e "${vim_settings}" >> /etc/vimrc
+        vimrc_file="/etc/vimrc"
     fi
+    for setting in "set paste" "set nu"; do
+        grep -qxF "$setting" "$vimrc_file" || echo "$setting" >> "$vimrc_file"
+    done
 
     timedatectl set-timezone Asia/Shanghai
-
-    echo "Please run 'source /etc/profile' to apply changes"
 }
 
 main() {
