@@ -1,6 +1,6 @@
 #!/bin/bash
 # Quick install:
-# curl -sfL https://raw.githubusercontent.com/alexchenx/alex-tools/master/init-os.sh | sh -s
+# curl -sfL https://raw.githubusercontent.com/alexchenx/alex-tools/master/init-os.sh | sh -
 
 set -e
 
