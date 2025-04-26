@@ -5,7 +5,7 @@
 
 set -e
 
-NGINX_VERSION="1.24.0"
+NGINX_VERSION="1.28.0"
 NGINX_HOME="/data/app/nginx"
 NGINX_USER="nginx"
 NGINX_SITES_DIR="${NGINX_HOME}/conf/conf.d"
